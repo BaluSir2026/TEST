@@ -1019,30 +1019,50 @@ Correct: B</pre>
     <script>
         // Initialize PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+        let quizQuestions = [];
+        let webAppUrl = "https://script.google.com/macros/s/AKfycbzvUf7wx7WA52l2j1gpztYOD6S84W0sWkxCz3ThOmzNtVbAf7sNmHhhliz4_QIbsl4_/exec";
         let quizQuestions = [];
         let studentData = {};
         let startTime;
         let timerInterval;
         let timeRemaining;
-        let webAppUrl = '';
 
         const QUIZ_SETTINGS = {
             timeLimit: 45,
             passingScore: 60
         };
 
+   async function loadQuestionsFromCloud() {
+    if (!webAppUrl) {
+        alert("Web App URL not configured!");
+        return;
+    }
+
+    try {
+        const response = await fetch(webAppUrl);
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+            quizQuestions = data;
+            console.log("Questions Loaded:", quizQuestions);
+            updateQuestionCount();
+        } else {
+            console.error("Unexpected response:", data);
+            alert("Error loading questions");
+        }
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Failed to load questions");
+    }
+}
         // Load configuration and questions
         window.addEventListener('DOMContentLoaded', function() {
-            const stored = localStorage.getItem('webAppUrl');
-            if (stored) {
-                webAppUrl = stored;
-                document.getElementById('webAppUrl').value = stored;
-                document.getElementById('successBox').classList.remove('hidden');
+            loadQuestionsFromCloud();
             }
 
             // Load questions from storage
-            loadQuestionsFromStorage();
+            loadQuestionsFromCloud();
             updateQuestionCount();
             toggleMode();
             
@@ -1053,6 +1073,27 @@ Correct: B</pre>
                 document.getElementById('quizContainer').classList.remove('hidden');
             }
         });
+    // Upload to Cloud
+    async function uploadQuestionsToCloud(questionsArray) {
+    try {
+        const response = await fetch(webAppUrl, {
+            method: "POST",
+            body: JSON.stringify({
+                type: "uploadQuestions",
+                questions: questionsArray
+            })
+        });
+
+        const result = await response.json();
+        console.log(result);
+
+        alert("Questions uploaded successfully!");
+
+    } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Failed to upload questions");
+    }
+}
 
         // Mode toggle
         function toggleMode() {
@@ -1094,7 +1135,6 @@ Correct: B</pre>
             }
 
             webAppUrl = url;
-            localStorage.setItem('webAppUrl', url);
             document.getElementById('successBox').classList.remove('hidden');
             showToast('Configuration saved successfully!', 'success');
         }
@@ -1337,22 +1377,6 @@ Correct: B</pre>
             }
         }
 
-        function saveQuestionsToStorage() {
-            localStorage.setItem('quizQuestions', JSON.stringify(quizQuestions));
-        }
-
-        function loadQuestionsFromStorage() {
-            const stored = localStorage.getItem('quizQuestions');
-            if (stored) {
-                try {
-                    quizQuestions = JSON.parse(stored);
-                } catch (error) {
-                    console.error('Error loading questions:', error);
-                    quizQuestions = [];
-                }
-            }
-        }
-
         function updateQuestionCount() {
             document.getElementById('questionCount').textContent = quizQuestions.length;
         }
@@ -1410,7 +1434,6 @@ Correct: B</pre>
         function clearAllQuestions() {
             if (confirm('Are you sure you want to delete all questions? This cannot be undone.')) {
                 quizQuestions = [];
-                saveQuestionsToStorage();
                 updateQuestionCount();
                 displayQuestionList();
                 showToast('All questions cleared', 'success');
@@ -1471,6 +1494,10 @@ Correct: B</pre>
         });
 
         function startQuiz() {
+            if (quizQuestions.length === 0) {
+                alert("No questions available. Please contact admin.");
+                 return;
+                }
             studentData = {
                 name: document.getElementById('studentName').value,
                 email: document.getElementById('studentEmail').value,
