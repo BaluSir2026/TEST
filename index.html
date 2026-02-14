@@ -1682,28 +1682,63 @@ Correct: B
         }
 
         function displayQuestions(qs) {
-            const list = document.getElementById('questionList');
-            list.innerHTML = '';
-            qs.forEach((q, i) => {
-                const item = document.createElement('div');
-                item.className = 'question-item';
-                item.innerHTML = `
-                    <div class="question-item-header">
-                        <div class="question-num">Q${i + 1}</div>
-                    </div>
-                    <div style="font-weight: 600; margin-bottom: 12px; color: var(--text);">${q.question}</div>
-                    <div style="display: grid; gap: 6px; margin-left: 20px;">
-                        ${q.options.map((opt, idx) => `
-                            <div style="padding: 8px 12px; border-radius: 8px; ${String.fromCharCode(65 + idx) === q.correct ? 'background: var(--success-light); font-weight: 600; color: var(--success);' : 'background: var(--surface-hover);'}">
-                                ${String.fromCharCode(65 + idx)}) ${opt} ${String.fromCharCode(65 + idx) === q.correct ? '✓' : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
+    const list = document.getElementById('questionList');
+    list.innerHTML = '';
+    
+    qs.forEach((q, i) => {
+        const item = document.createElement('div');
+        item.className = 'question-item';
+        
+        // Create header
+        const header = document.createElement('div');
+        header.className = 'question-item-header';
+        header.innerHTML = `<div class="question-num">Q${i + 1}</div>`;
+        
+        // Create question text with HTML entity rendering
+        const questionDiv = document.createElement('div');
+        questionDiv.style.fontWeight = '600';
+        questionDiv.style.marginBottom = '12px';
+        questionDiv.style.color = 'var(--text)';
+        questionDiv.innerHTML = q.question; // ✅ Render HTML entities
+        
+        // Create options container
+        const optionsContainer = document.createElement('div');
+        optionsContainer.style.display = 'grid';
+        optionsContainer.style.gap = '6px';
+        optionsContainer.style.marginLeft = '20px';
+        
+        // Create each option
+        q.options.forEach((opt, idx) => {
+            const optionDiv = document.createElement('div');
+            const letter = String.fromCharCode(65 + idx);
+            const isCorrect = letter === q.correct;
+            
+            optionDiv.style.padding = '8px 12px';
+            optionDiv.style.borderRadius = '8px';
+            
+            if (isCorrect) {
+                optionDiv.style.background = 'var(--success-light)';
+                optionDiv.style.fontWeight = '600';
+                optionDiv.style.color = 'var(--success)';
+            } else {
+                optionDiv.style.background = 'var(--surface-hover)';
+            }
+            
+            // Use innerHTML to render HTML entities in options
+            const optionContent = document.createElement('span');
+            optionContent.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`; // ✅ Render HTML entities
+            
+            optionDiv.appendChild(optionContent);
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        // Assemble the item
+        item.appendChild(header);
+        item.appendChild(questionDiv);
+        item.appendChild(optionsContainer);
+        list.appendChild(item);
+    });
+}
         function clearLocalQuestions() {
             document.getElementById('questionList').innerHTML = '<div class="loading"><div>Click "Reload from Sheets"</div></div>';
             showToast('Cache cleared', 'success');
