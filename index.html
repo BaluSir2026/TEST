@@ -1562,7 +1562,12 @@ Correct: B
             blocks.forEach(block => {
                 const lines = block.split('\n').map(l => l.trim()).filter(l => l);
                 if (lines.length < 5) return;
-                const question = lines[0];
+                for (let i = 0; i < lines.length; i++) {
+                      if (/^[A-D][\.\)]\s*/i.test(line)) {
+                       break; // Found options, stop adding to question
+                        }
+                     questionText += line + '\n'; // Add line to question
+                   }
                 const options = [];
                 let correct = '';
                 for (let i = 1; i < lines.length; i++) {
