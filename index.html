@@ -1557,33 +1557,55 @@ Correct: B
         }
 
         function parseQuestions(text) {
-            const parsed = [];
-            const blocks = text.split(/Q\d+[\.\)]\s*/i).filter(b => b.trim());
-            blocks.forEach(block => {
-                const lines = block.split('\n').map(l => l.trim()).filter(l => l);
-                if (lines.length < 5) return;
-                for (let i = 0; i < lines.length; i++) {
-                      if (/^[A-D][\.\)]\s*/i.test(line)) {
-                       break; // Found options, stop adding to question
-                        }
-                     questionText += line + '\n'; // Add line to question
-                   }
-                const options = [];
-                let correct = '';
-                for (let i = 1; i < lines.length; i++) {
-                    const optMatch = lines[i].match(/^([A-D])[.\):]\s*(.+)/i);
-                    if (optMatch) options.push(optMatch[2].trim());
-                    const corrMatch = lines[i].match(/Correct:\s*([A-D])/i);
-                    if (corrMatch) correct = corrMatch[1].toUpperCase();
-                }
-                if (question && options.length === 4 && correct) {
-                    parsed.push({
-                        question, optionA: options[0], optionB: options[1],
-                        optionC: options[2], optionD: options[3],
-                        correct, quizId
-                    });
-                }
+           const parsed = [];
+
+    // Split questions using Q1., Q2), etc.
+    const blocks = text.split(/Q\d+[\.\)]\s*/i).filter(b => b.trim());
+
+    blocks.forEach(block => {
+
+        const lines = block.split('\n');
+
+        let questionLines = [];
+        let options = [];
+        let correct = "";
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+
+            // Detect options A-D
+            const optMatch = trimmed.match(/^([A-D])[\.\)]\s*(.+)/i);
+            if (optMatch) {
+                options.push(optMatch[2].trim());
+                return;
+            }
+
+            // Detect correct answer
+            const corrMatch = trimmed.match(/Correct:\s*([A-D])/i);
+            if (corrMatch) {
+                correct = corrMatch[1].toUpperCase();
+                return;
+            }
+
+            // If not option or correct, it's part of question (including code)
+            if (trimmed !== "") {
+                questionLines.push(line); // keep original formatting
+            }
+        });
+
+        if (questionLines.length && options.length === 4 && correct) {
+
+            parsed.push({
+                question: questionLines.join('\n').trim(),
+                options: options,
+                correct: correct.charCodeAt(0) - 65
             });
+
+        }
+
+    });
+
+    return parsed;
             if (parsed.length > 0) uploadQuestionsToSheets(parsed);
             else showToast('No valid questions found', 'error');
         }
