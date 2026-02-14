@@ -1557,58 +1557,82 @@ Correct: B
         }
 
         function parseQuestions(text) {
-           const parsed = [];
-
-    // Split questions using Q1., Q2), etc.
-    const blocks = text.split(/Q\d+[\.\)]\s*/i).filter(b => b.trim());
-
-    blocks.forEach(block => {
-
-        const lines = block.split('\n');
-
-        let questionLines = [];
-        let options = [];
-        let correct = "";
-
-        lines.forEach(line => {
-            const trimmed = line.trim();
-
-            // Detect options A-D
-            const optMatch = trimmed.match(/^([A-D])[\.\)]\s*(.+)/i);
-            if (optMatch) {
-                options.push(optMatch[2].trim());
-                return;
+    const parsed = [];
+    
+    // Split by question markers (Q1., Q2., etc.)
+    const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
+    
+    questionBlocks.forEach(block => {
+        try {
+            const lines = block.split('\n').map(l => l.trim());
+            
+            let questionText = '';
+            let questionStartIndex = 0;
+            
+            // Capture all lines until we hit options
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Check if this is the start of options
+                if (/^[A-D][\.\)]\s*/i.test(line)) {
+                    questionStartIndex = i;
+                    break;
+                }
+                
+                // Remove question number from first line only
+                if (i === 0) {
+                    questionText += line.replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
+                } else if (line) {
+                    questionText += line + '\n';
+                }
             }
-
-            // Detect correct answer
-            const corrMatch = trimmed.match(/Correct:\s*([A-D])/i);
-            if (corrMatch) {
-                correct = corrMatch[1].toUpperCase();
-                return;
+            
+            questionText = questionText.trim();
+            if (!questionText) return;
+            
+            // Parse options
+            const options = [];
+            let correct = '';
+            
+            for (let i = questionStartIndex; i < lines.length; i++) {
+                const line = lines[i];
+                
+                const optionMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
+                if (optionMatch && options.length < 4) {
+                    options.push(optionMatch[2].trim());
+                    continue;
+                }
+                
+                const correctMatch = line.match(/Correct:\s*([A-D])/i);
+                if (correctMatch) {
+                    correct = correctMatch[1].toUpperCase();
+                    break;
+                }
             }
-
-            // If not option or correct, it's part of question (including code)
-            if (trimmed !== "") {
-                questionLines.push(line); // keep original formatting
+            
+            // Only add if complete
+            if (questionText && options.length === 4 && correct) {
+                parsed.push({
+                    question: questionText,
+                    optionA: options[0],
+                    optionB: options[1],
+                    optionC: options[2],
+                    optionD: options[3],
+                    correct: correct,
+                    quizId: quizId
+                });
             }
-        });
-
-        if (questionLines.length && options.length === 4 && correct) {
-
-            parsed.push({
-                question: questionLines.join('\n').trim(),
-                options: options,
-                correct: correct.charCodeAt(0) - 65
-            });
-
+        } catch (error) {
+            console.error('Error parsing question:', error);
         }
-
     });
-
-    return parsed;
-            if (parsed.length > 0) uploadQuestionsToSheets(parsed);
-            else showToast('No valid questions found', 'error');
-        }
+    
+    if (parsed.length > 0) {
+        uploadQuestionsToSheets(parsed);
+    } else {
+        showToast('❌ No valid questions found. Check format.', 'error');
+    }
+}
 
         async function uploadQuestionsToSheets(questions) {
             if (!webAppUrl) {
