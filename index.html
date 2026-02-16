@@ -1462,7 +1462,82 @@ Correct: B
                 }
             }
         });
+        // ============================================
+// 🔒 COMPLETE QUIZ PROTECTION SYSTEM
+// ============================================
 
+(function() {
+    'use strict';
+    
+    // 1. Disable developer tools
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+            (e.ctrlKey && e.keyCode === 85)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // 2. Disable copy/paste
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('cut', e => e.preventDefault());
+    document.addEventListener('paste', e => e.preventDefault());
+    
+    // 3. Disable text selection
+    document.addEventListener('selectstart', e => e.preventDefault());
+    
+    // 4. Clear console
+    console.log = console.warn = console.error = function() {};
+    
+    // 5. Detect DevTools
+    setInterval(function() {
+        if (window.outerWidth - window.innerWidth > 160 || 
+            window.outerHeight - window.innerHeight > 160) {
+            alert('⚠️ Developer tools detected!');
+            window.location.href = 'about:blank';
+        }
+    }, 1000);
+    
+    // 6. Prevent tab switching
+    let tabSwitchCount = 0;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            tabSwitchCount++;
+            if (tabSwitchCount > 3) {
+                alert('⚠️ Too many tab switches. Quiz terminated.');
+                window.location.href = 'about:blank';
+            } else {
+                alert(`⚠️ Tab switching detected (${tabSwitchCount}/3)`);
+            }
+        }
+    });
+    
+    // 7. Detect multiple attempts
+    const attemptKey = 'quiz_attempt_' + window.location.pathname;
+    if (localStorage.getItem(attemptKey)) {
+        alert('⚠️ You have already attempted this quiz');
+        window.location.href = 'about:blank';
+        throw new Error('Multiple attempts');
+    }
+    localStorage.setItem(attemptKey, 'true');
+    
+    // 8. Fullscreen enforcement
+    function enterFullscreen() {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        }
+    }
+    
+    document.addEventListener('fullscreenchange', function() {
+        if (!document.fullscreenElement) {
+            alert('⚠️ Please remain in fullscreen mode');
+            enterFullscreen();
+        }
+    });
+    
+})();
         function toggleMode() {
             const modeSelector = document.getElementById('modeSelector');
             const mode = modeSelector.value;
