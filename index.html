@@ -1082,6 +1082,62 @@
     padding: 2px 6px;
     border-radius: 4px;
 }
+/* Floating Timer */
+.timer-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--danger), #f87171);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.timer-floating .timer-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.timer-floating .timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+.progress-floating {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+    z-index: 1000;
+    font-weight: 600;
+    font-size: 0.9em;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hide original timer section on mobile when using floating */
+@media (max-width: 768px) {
+    .timer-section {
+        display: none;
+    }
+}
     </style>
 </head>
 <body>
@@ -1243,6 +1299,15 @@ Correct: B
             </div>
 
             <!-- Quiz Content -->
+            <!-- Floating Timer (Always Visible) -->
+<div class="timer-floating" id="floatingTimer" style="display: none;">
+    <div class="timer-label">⏱️ Time Left</div>
+    <div class="timer" id="floatingTimerDisplay">45:00</div>
+</div>
+
+<div class="progress-floating" id="floatingProgress" style="display: none;">
+    <span id="floatingAnsweredCount">0</span> / <span id="floatingTotalCount">0</span> Answered
+</div>
             <div id="quizContent" class="hidden">
                 <div class="timer-section">
                     <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
@@ -1788,6 +1853,7 @@ Correct: B
                 const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${quizId}`);
                 const data = await response.json();
                 if (data.status === 'success' && data.questions.length > 0) {
+                    document.getElementById('floatingTotalCount').textContent = questions.length;
                     questions = data.questions;
                     document.getElementById('loadingQuestions').classList.add('hidden');
                     generateQuestions();
@@ -1872,23 +1938,45 @@ Correct: B
 }
     
         function startTimer() {
-            startTime = new Date();
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                const m = Math.floor(timeRemaining / 60);
-                const s = timeRemaining % 60;
-                document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    submitQuiz(true);
-                }
-            }, 1000);
+    startTime = new Date();
+    
+    // Show floating timer
+    document.getElementById('floatingTimer').style.display = 'flex';
+    document.getElementById('floatingProgress').style.display = 'block';
+    
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const m = Math.floor(timeRemaining / 60);
+        const s = timeRemaining % 60;
+        const timeString = `${m}:${s.toString().padStart(2, '0')}`;
+        
+        // Update both timers
+        document.getElementById('timer').textContent = timeString;
+        document.getElementById('floatingTimerDisplay').textContent = timeString;
+
+        // Save progress every minute
+        if (timeRemaining % 60 === 0) {
+            saveQuizProgress();
         }
 
-        function updateProgress() {
-            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
-            document.getElementById('answeredCount').textContent = answered;
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            stopAutoSave();
+            submitQuiz(true);
         }
+    }, 1000);
+}
+
+    function updateProgress() {
+    const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+    
+    // Update both progress displays
+    document.getElementById('answeredCount').textContent = answered;
+    document.getElementById('floatingAnsweredCount').textContent = answered;
+    
+    // Save progress when answer changes
+    saveQuizProgress();
+}
 
         async function submitQuiz(timeUp = false) {
             if (!timeUp) {
