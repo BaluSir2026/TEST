@@ -1971,153 +1971,99 @@ function generateQuestions() {
         questionText.style.overflow = 'auto';
         questionText.style.fontSize = '0.95em';
         questionText.style.lineHeight = '1.6';
+        questionText.style.marginBottom = '24px';
         questionText.textContent = q.question;
         card.appendChild(questionText);
         
-        // ✅ OPTIONS GRID - VERTICAL LAYOUT
-        const optionsGrid = document.createElement('div');
-        optionsGrid.style.display = 'flex';
-        optionsGrid.style.flexDirection = 'column';  // Vertical stack
-        optionsGrid.style.gap = '12px';
-        optionsGrid.style.marginTop = '20px';
-        
+        // ✅ OPTIONS - EACH OPTION AS SEPARATE BLOCK
         q.options.forEach((opt, i) => {
-            const optionItem = document.createElement('div');
-            optionItem.style.position = 'relative';
-            optionItem.style.width = '100%';
+            const optionContainer = document.createElement('div');
+            optionContainer.style.marginBottom = '12px'; // Space between options
+            optionContainer.style.width = '100%';
             
-            // Radio input
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.id = `q${index}_${i}`;
             radio.name = `q${index}`;
             radio.value = String.fromCharCode(65 + i);
             radio.setAttribute('data-correct', q.correct);
-            radio.onchange = updateProgress;
-            radio.style.position = 'absolute';
-            radio.style.opacity = '0';
+            radio.style.display = 'none'; // Hide radio button
+            radio.onchange = function() {
+                updateProgress();
+                updateOptionStyles(index);
+            };
             
-            // Label
             const label = document.createElement('label');
             label.htmlFor = `q${index}_${i}`;
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.gap = '16px';
+            label.style.display = 'block'; // ✅ BLOCK DISPLAY (each on new line)
             label.style.padding = '16px 20px';
-            label.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
-            label.style.border = '2px solid var(--border)';
-            label.style.borderRadius = '14px';
+            label.style.background = '#ffffff';
+            label.style.border = '2px solid #e2e8f0';
+            label.style.borderRadius = '12px';
             label.style.cursor = 'pointer';
             label.style.transition = 'all 0.3s ease';
+            label.style.fontSize = '1em';
+            label.style.lineHeight = '1.6';
             label.style.width = '100%';
             label.style.boxSizing = 'border-box';
+            label.setAttribute('data-question', index);
+            label.setAttribute('data-option', i);
             
-            // Add hover effect
+            // Label text content
+            const optionLetter = String.fromCharCode(65 + i);
+            label.textContent = `${optionLetter}) ${opt}`;
+            
+            // Hover effect
             label.addEventListener('mouseenter', function() {
                 if (!radio.checked) {
-                    this.style.borderColor = 'var(--primary)';
-                    this.style.transform = 'translateX(4px)';
+                    this.style.borderColor = '#7c3aed';
+                    this.style.background = '#f9fafb';
                 }
             });
+            
             label.addEventListener('mouseleave', function() {
                 if (!radio.checked) {
-                    this.style.borderColor = 'var(--border)';
-                    this.style.transform = 'translateX(0)';
+                    this.style.borderColor = '#e2e8f0';
+                    this.style.background = '#ffffff';
                 }
             });
             
-            // Radio marker
-            const marker = document.createElement('div');
-            marker.style.width = '24px';
-            marker.style.height = '24px';
-            marker.style.border = '2px solid var(--border)';
-            marker.style.borderRadius = '50%';
-            marker.style.display = 'flex';
-            marker.style.alignItems = 'center';
-            marker.style.justifyContent = 'center';
-            marker.style.flexShrink = '0';
-            marker.style.background = 'white';
-            marker.style.transition = 'all 0.3s ease';
-            
-            // Option text
-            const optionSpan = document.createElement('span');
-            optionSpan.style.flex = '1';
-            optionSpan.style.fontSize = '1em';
-            optionSpan.style.lineHeight = '1.5';
-            optionSpan.style.wordWrap = 'break-word';
-            optionSpan.textContent = opt;
-            
-            // Handle selection
-            radio.addEventListener('change', function() {
-                if (this.checked) {
-                    // Update this option's style
-                    label.style.background = 'var(--gradient-primary)';
-                    label.style.borderColor = 'var(--primary)';
-                    label.style.transform = 'scale(1.02)';
-                    label.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
-                    marker.style.background = 'white';
-                    marker.style.borderColor = 'white';
-                    marker.innerHTML = '<span style="color: var(--primary); font-weight: bold;">✓</span>';
-                    optionSpan.style.color = 'white';
-                    
-                    // Reset other options in this question
-                    document.querySelectorAll(`input[name="q${index}"]`).forEach(r => {
-                        if (r !== this) {
-                            const otherLabel = r.nextElementSibling;
-                            if (otherLabel) {
-                                otherLabel.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
-                                otherLabel.style.borderColor = 'var(--border)';
-                                otherLabel.style.transform = 'scale(1)';
-                                otherLabel.style.boxShadow = 'none';
-                                const otherMarker = otherLabel.querySelector('div');
-                                const otherSpan = otherLabel.querySelector('span');
-                                if (otherMarker) {
-                                    otherMarker.style.background = 'white';
-                                    otherMarker.style.borderColor = 'var(--border)';
-                                    otherMarker.innerHTML = '';
-                                }
-                                if (otherSpan) {
-                                    otherSpan.style.color = 'var(--text)';
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-            
-            label.appendChild(marker);
-            label.appendChild(optionSpan);
-            optionItem.appendChild(radio);
-            optionItem.appendChild(label);
-            optionsGrid.appendChild(optionItem);
+            optionContainer.appendChild(radio);
+            optionContainer.appendChild(label);
+            card.appendChild(optionContainer);
         });
         
-        card.appendChild(optionsGrid);
-        
-        // Navigation buttons
+        // Navigation section
         const navigationDiv = document.createElement('div');
         navigationDiv.style.display = 'flex';
         navigationDiv.style.justifyContent = 'space-between';
-        navigationDiv.style.marginTop = '24px';
-        navigationDiv.style.gap = '12px';
+        navigationDiv.style.alignItems = 'center';
+        navigationDiv.style.marginTop = '32px';
         navigationDiv.style.paddingTop = '24px';
-        navigationDiv.style.borderTop = '2px solid var(--border)';
+        navigationDiv.style.borderTop = '2px solid #e2e8f0';
+        navigationDiv.style.gap = '12px';
         
-        const prevBtn = document.createElement('button');
-        prevBtn.type = 'button';
-        prevBtn.className = 'btn btn-secondary';
-        prevBtn.innerHTML = '⬅️ Previous';
-        prevBtn.style.display = index === 0 ? 'none' : 'inline-flex';
-        prevBtn.onclick = () => navigateToQuestion(index - 1);
-        navigationDiv.appendChild(prevBtn);
+        // Previous button
+        if (index > 0) {
+            const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'btn btn-secondary';
+            prevBtn.innerHTML = '⬅️ Previous';
+            prevBtn.onclick = () => navigateToQuestion(index - 1);
+            navigationDiv.appendChild(prevBtn);
+        } else {
+            navigationDiv.appendChild(document.createElement('div')); // Spacer
+        }
         
+        // Question indicator
         const indicator = document.createElement('div');
         indicator.style.fontSize = '0.9em';
-        indicator.style.color = 'var(--text-light)';
+        indicator.style.color = '#64748b';
         indicator.style.fontWeight = '600';
-        indicator.innerHTML = `<span style="color: var(--primary); font-size: 1.1em;">${index + 1}</span> / ${questions.length}`;
+        indicator.innerHTML = `<span style="color: #7c3aed; font-size: 1.2em; font-weight: 700;">${index + 1}</span> <span style="color: #94a3b8;">/</span> ${questions.length}`;
         navigationDiv.appendChild(indicator);
         
+        // Next/Submit button
         if (index < questions.length - 1) {
             const nextBtn = document.createElement('button');
             nextBtn.type = 'button';
@@ -2142,6 +2088,34 @@ function generateQuestions() {
     currentQuestionIndex = 0;
     generateQuestionPalette();
     document.getElementById('submitBtn').style.display = 'none';
+}
+
+// Helper function to update option styles when selected
+function updateOptionStyles(questionIndex) {
+    const radios = document.querySelectorAll(`input[name="q${questionIndex}"]`);
+    
+    radios.forEach(radio => {
+        const label = document.querySelector(`label[for="${radio.id}"]`);
+        if (!label) return;
+        
+        if (radio.checked) {
+            // Selected style
+            label.style.background = 'linear-gradient(135deg, #7c3aed, #a78bfa)';
+            label.style.borderColor = '#7c3aed';
+            label.style.color = 'white';
+            label.style.fontWeight = '600';
+            label.style.transform = 'scale(1.02)';
+            label.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
+        } else {
+            // Unselected style
+            label.style.background = '#ffffff';
+            label.style.borderColor = '#e2e8f0';
+            label.style.color = '#1e293b';
+            label.style.fontWeight = '400';
+            label.style.transform = 'scale(1)';
+            label.style.boxShadow = 'none';
+        }
+    });
 }
         
 function startTimer() {
