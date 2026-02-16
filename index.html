@@ -1723,7 +1723,6 @@ Correct: B
     function parseQuestions(text) {
     const parsed = [];
     
-    // Split by question markers (Q1., Q2., etc.)
     const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
     
     questionBlocks.forEach(block => {
@@ -1733,17 +1732,14 @@ Correct: B
             let questionText = '';
             let questionStartIndex = 0;
             
-            // Capture all lines until we hit options
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 
-                // Check if this is the start of options
                 if (/^[A-D][\.\)]\s*/i.test(line)) {
                     questionStartIndex = i;
                     break;
                 }
                 
-                // Remove question number from first line only
                 if (i === 0) {
                     questionText += line.replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
                 } else if (line) {
@@ -1752,9 +1748,9 @@ Correct: B
             }
             
             questionText = questionText.trim();
+            
             if (!questionText) return;
             
-            // Parse options
             const options = [];
             let correct = '';
             
@@ -1774,8 +1770,8 @@ Correct: B
                 }
             }
             
-            // Only add if complete
             if (questionText && options.length === 4 && correct) {
+                // ✅ Store raw text without escaping
                 parsed.push({
                     question: questionText,
                     optionA: options[0],
@@ -1794,11 +1790,11 @@ Correct: B
     if (parsed.length > 0) {
         uploadQuestionsToSheets(parsed);
     } else {
-        showToast('❌ No valid questions found. Check format.', 'error');
+        showToast('❌ No valid questions found. Please check format.', 'error');
     }
 }
 
-        async function uploadQuestionsToSheets(questions) {
+    async function uploadQuestionsToSheets(questions) {
             if (!webAppUrl) {
                 showToast('Please configure first', 'error');
                 return;
@@ -1858,18 +1854,21 @@ Correct: B
         
         item.appendChild(header);
         
-        // Question text - WITH CODE FORMATTING
+        // Question text - Use textContent
         const questionDiv = document.createElement('div');
         questionDiv.style.fontWeight = '600';
         questionDiv.style.marginBottom = '12px';
         questionDiv.style.color = 'var(--text)';
-        questionDiv.style.whiteSpace = 'pre-wrap';  // ✅ Preserve line breaks
-        questionDiv.style.fontFamily = "'JetBrains Mono', monospace";  // ✅ Code font
-        questionDiv.style.backgroundColor = '#f8f9fa';  // ✅ Background
+        questionDiv.style.whiteSpace = 'pre-wrap';
+        questionDiv.style.fontFamily = "'JetBrains Mono', monospace";
+        questionDiv.style.backgroundColor = '#f8f9fa';
         questionDiv.style.padding = '12px';
         questionDiv.style.borderRadius = '8px';
         questionDiv.style.overflow = 'auto';
-        questionDiv.innerHTML = q.question;
+        
+        // ✅ Use textContent
+        questionDiv.textContent = q.question;
+        
         item.appendChild(questionDiv);
         
         // Options
@@ -1894,7 +1893,8 @@ Correct: B
                 optionDiv.style.background = '#f9fafb';
             }
             
-            optionDiv.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
+            // ✅ Use textContent for options
+            optionDiv.textContent = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
             
             optionsContainer.appendChild(optionDiv);
         });
@@ -1903,8 +1903,8 @@ Correct: B
         list.appendChild(item);
     });
 }
-
-        function clearLocalQuestions() {
+        
+    function clearLocalQuestions() {
             document.getElementById('questionList').innerHTML = '<div class="loading"><div>Click "Reload from Sheets"</div></div>';
             showToast('Cache cleared', 'success');
         }
@@ -1949,6 +1949,8 @@ Correct: B
     questions.forEach((q, index) => {
         const card = document.createElement('div');
         card.className = 'question-card';
+        card.id = `question-${index}`;
+        card.style.display = index === 0 ? 'block' : 'none';
         
         // Question number
         const questionNumber = document.createElement('div');
@@ -1956,17 +1958,23 @@ Correct: B
         questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
         card.appendChild(questionNumber);
         
-        // Question text - WITH PROPER CODE FORMATTING
+        // Question text - Use textContent (not innerHTML)
         const questionText = document.createElement('div');
         questionText.className = 'question-text';
-        questionText.style.whiteSpace = 'pre-wrap';  // ✅ Preserve line breaks
-        questionText.style.fontFamily = "'JetBrains Mono', 'Courier New', monospace";  // ✅ Code font
-        questionText.style.backgroundColor = '#f8f9fa';  // ✅ Light background for code
-        questionText.style.padding = '16px';  // ✅ Padding around code
-        questionText.style.borderRadius = '12px';  // ✅ Rounded corners
-        questionText.style.border = '1px solid #e2e8f0';  // ✅ Border
-        questionText.style.overflow = 'auto';  // ✅ Scrollable if too wide
-        questionText.innerHTML = q.question;
+        questionText.style.whiteSpace = 'pre-wrap';
+        questionText.style.fontFamily = "'JetBrains Mono', 'Courier New', monospace";
+        questionText.style.backgroundColor = '#1e293b';
+        questionText.style.color = '#e2e8f0';
+        questionText.style.padding = '20px';
+        questionText.style.borderRadius = '12px';
+        questionText.style.border = '2px solid #334155';
+        questionText.style.overflow = 'auto';
+        questionText.style.fontSize = '0.95em';
+        questionText.style.lineHeight = '1.6';
+        
+        // ✅ Use textContent to display raw text with < and >
+        questionText.textContent = q.question;
+        
         card.appendChild(questionText);
         
         // Options grid
@@ -1977,7 +1985,6 @@ Correct: B
             const optionItem = document.createElement('div');
             optionItem.className = 'option-item';
             
-            // Radio input
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.id = `q${index}_${i}`;
@@ -1986,18 +1993,16 @@ Correct: B
             radio.setAttribute('data-correct', q.correct);
             radio.onchange = updateProgress;
             
-            // Label
             const label = document.createElement('label');
             label.className = 'option-label';
             label.htmlFor = `q${index}_${i}`;
             
-            // Marker
             const marker = document.createElement('div');
             marker.className = 'option-marker';
             
-            // Option text - USE innerHTML to render HTML entities
             const optionSpan = document.createElement('span');
-            optionSpan.innerHTML = opt;
+            // ✅ Use textContent for options too (not innerHTML)
+            optionSpan.textContent = opt;
             
             label.appendChild(marker);
             label.appendChild(optionSpan);
@@ -2007,11 +2012,59 @@ Correct: B
         });
         
         card.appendChild(optionsGrid);
+        
+        // Navigation buttons
+        const navigationDiv = document.createElement('div');
+        navigationDiv.className = 'question-navigation';
+        navigationDiv.style.display = 'flex';
+        navigationDiv.style.justifyContent = 'space-between';
+        navigationDiv.style.marginTop = '24px';
+        navigationDiv.style.gap = '12px';
+        navigationDiv.style.paddingTop = '24px';
+        navigationDiv.style.borderTop = '2px solid var(--border)';
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'btn btn-secondary';
+        prevBtn.innerHTML = '⬅️ Previous';
+        prevBtn.style.display = index === 0 ? 'none' : 'inline-flex';
+        prevBtn.onclick = () => navigateToQuestion(index - 1);
+        navigationDiv.appendChild(prevBtn);
+        
+        const indicator = document.createElement('div');
+        indicator.style.fontSize = '0.9em';
+        indicator.style.color = 'var(--text-light)';
+        indicator.style.fontWeight = '600';
+        indicator.innerHTML = `<span style="color: var(--primary); font-size: 1.1em;">${index + 1}</span> / ${questions.length}`;
+        navigationDiv.appendChild(indicator);
+        
+        if (index < questions.length - 1) {
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'btn btn-primary';
+            nextBtn.innerHTML = 'Next ➡️';
+            nextBtn.onclick = () => navigateToQuestion(index + 1);
+            navigationDiv.appendChild(nextBtn);
+        } else {
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'button';
+            submitBtn.className = 'btn btn-success';
+            submitBtn.innerHTML = '✅ Submit Quiz';
+            submitBtn.id = 'finalSubmitBtn';
+            submitBtn.onclick = () => submitQuiz(false);
+            navigationDiv.appendChild(submitBtn);
+        }
+        
+        card.appendChild(navigationDiv);
         form.appendChild(card);
     });
-}
     
-        function startTimer() {
+    currentQuestionIndex = 0;
+    generateQuestionPalette();
+    document.getElementById('submitBtn').style.display = 'none';
+}
+        
+function startTimer() {
     startTime = new Date();
     
     // Show floating timer
