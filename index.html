@@ -1063,6 +1063,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+/* Code Question Formatting */
+.question-text {
+    white-space: pre-wrap !important;
+    font-family: 'JetBrains Mono', 'Courier New', Consolas, Monaco, monospace !important;
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    line-height: 1.6;
+    font-size: 0.95em;
+}
+
+/* Make code stand out more */
+.question-text code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
     </style>
 </head>
 <body>
@@ -1681,7 +1700,7 @@ Correct: B
             }
         }
 
-        function displayQuestions(qs) {
+    function displayQuestions(qs) {
     const list = document.getElementById('questionList');
     list.innerHTML = '';
     
@@ -1700,13 +1719,18 @@ Correct: B
         
         item.appendChild(header);
         
-        // Question text - USE innerHTML to render HTML entities
+        // Question text - WITH CODE FORMATTING
         const questionDiv = document.createElement('div');
         questionDiv.style.fontWeight = '600';
         questionDiv.style.marginBottom = '12px';
         questionDiv.style.color = 'var(--text)';
-        questionDiv.style.whiteSpace = 'pre-wrap';  // Preserve line breaks
-        questionDiv.innerHTML = q.question;  // ✅ This renders &lt; as 
+        questionDiv.style.whiteSpace = 'pre-wrap';  // ✅ Preserve line breaks
+        questionDiv.style.fontFamily = "'JetBrains Mono', monospace";  // ✅ Code font
+        questionDiv.style.backgroundColor = '#f8f9fa';  // ✅ Background
+        questionDiv.style.padding = '12px';
+        questionDiv.style.borderRadius = '8px';
+        questionDiv.style.overflow = 'auto';
+        questionDiv.innerHTML = q.question;
         item.appendChild(questionDiv);
         
         // Options
@@ -1731,8 +1755,7 @@ Correct: B
                 optionDiv.style.background = '#f9fafb';
             }
             
-            // USE innerHTML to render HTML entities
-            optionDiv.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;  // ✅ This renders &lt; as 
+            optionDiv.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
             
             optionsContainer.appendChild(optionDiv);
         });
@@ -1741,7 +1764,7 @@ Correct: B
         list.appendChild(item);
     });
 }
-    
+
         function clearLocalQuestions() {
             document.getElementById('questionList').innerHTML = '<div class="loading"><div>Click "Reload from Sheets"</div></div>';
             showToast('Cache cleared', 'success');
@@ -1779,7 +1802,7 @@ Correct: B
             }
         }
 
-        function generateQuestions() {
+    function generateQuestions() {
     const form = document.getElementById('quizForm');
     form.innerHTML = '';
     
@@ -1793,10 +1816,17 @@ Correct: B
         questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
         card.appendChild(questionNumber);
         
-        // Question text - USE innerHTML to render HTML entities
+        // Question text - WITH PROPER CODE FORMATTING
         const questionText = document.createElement('div');
         questionText.className = 'question-text';
-        questionText.innerHTML = q.question;  // ✅ This renders &lt; as 
+        questionText.style.whiteSpace = 'pre-wrap';  // ✅ Preserve line breaks
+        questionText.style.fontFamily = "'JetBrains Mono', 'Courier New', monospace";  // ✅ Code font
+        questionText.style.backgroundColor = '#f8f9fa';  // ✅ Light background for code
+        questionText.style.padding = '16px';  // ✅ Padding around code
+        questionText.style.borderRadius = '12px';  // ✅ Rounded corners
+        questionText.style.border = '1px solid #e2e8f0';  // ✅ Border
+        questionText.style.overflow = 'auto';  // ✅ Scrollable if too wide
+        questionText.innerHTML = q.question;
         card.appendChild(questionText);
         
         // Options grid
@@ -1827,7 +1857,7 @@ Correct: B
             
             // Option text - USE innerHTML to render HTML entities
             const optionSpan = document.createElement('span');
-            optionSpan.innerHTML = opt;  // ✅ This renders &lt; as 
+            optionSpan.innerHTML = opt;
             
             label.appendChild(marker);
             label.appendChild(optionSpan);
