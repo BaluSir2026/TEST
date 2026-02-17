@@ -1319,6 +1319,15 @@ Correct: B
             </div>
 
             <!-- Quiz Content -->
+            <!-- Floating Timer (Always Visible) -->
+<div class="timer-floating" id="floatingTimer" style="display: none;">
+    <div class="timer-label">⏱️ Time Left</div>
+    <div class="timer" id="floatingTimerDisplay">45:00</div>
+</div>
+
+<div class="progress-floating" id="floatingProgress" style="display: none;">
+    <span id="floatingAnsweredCount">0</span> / <span id="floatingTotalCount">0</span> Answered
+</div>
             <div id="quizContent" class="hidden">
                 <div class="timer-section">
                     <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
@@ -1940,10 +1949,12 @@ Correct: B
                 const data = await response.json();
 
                 if (data.status === 'success' && data.questions && data.questions.length > 0) {
-                    questions = data.questions; // ✅ Set FIRST before using questions.length
+                    questions = data.questions;
                     document.getElementById('loadingQuestions').classList.add('hidden');
                     document.getElementById('totalCount').textContent = questions.length;
-                    document.getElementById('floatingTotalCount').textContent = questions.length;
+                    // ✅ Safe update - only if element exists
+                    const floatingTotal = document.getElementById('floatingTotalCount');
+                    if (floatingTotal) floatingTotal.textContent = questions.length;
                     generateQuestions();
                     document.getElementById('submitBtn').classList.remove('hidden');
                     startTimer();
@@ -2161,7 +2172,9 @@ function navigateToQuestion(index) {
     const target = document.getElementById(`question-${index}`);
     if (target) {
         target.style.display = 'block';
-        const scrollTarget = document.getElementById('questionPalette') || target;
+        // ✅ Scroll to the question palette (top of quiz area), not top of page
+        const palette = document.getElementById('questionPalette');
+        const scrollTarget = palette || target;
         scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -2191,21 +2204,25 @@ function stopAutoSave() {
 }
         
 function startTimer() {
-    startTime = new Date(); 
+    startTime = new Date();
+    
+    // Show floating timer (only if elements exist)
+    const floatingTimer = document.getElementById('floatingTimer');
+    const floatingProgress = document.getElementById('floatingProgress');
+    if (floatingTimer) floatingTimer.style.display = 'flex';
+    if (floatingProgress) floatingProgress.style.display = 'block';
+    
     timerInterval = setInterval(() => {
         timeRemaining--;
         const m = Math.floor(timeRemaining / 60);
         const s = timeRemaining % 60;
         const timeString = `${m}:${s.toString().padStart(2, '0')}`;
         
-        // Update both timers
         document.getElementById('timer').textContent = timeString;
-        document.getElementById('floatingTimerDisplay').textContent = timeString;
+        const floatingDisplay = document.getElementById('floatingTimerDisplay');
+        if (floatingDisplay) floatingDisplay.textContent = timeString;
 
-        // Save progress every minute
-        if (timeRemaining % 60 === 0) {
-            saveQuizProgress();
-        }
+        if (timeRemaining % 60 === 0) saveQuizProgress();
 
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
@@ -2217,7 +2234,9 @@ function startTimer() {
 
     function updateProgress() {
     const answered = document.querySelectorAll('input[type="radio"]:checked').length;
-    document.getElementById('floatingAnsweredCount').textContent = answered;
+    document.getElementById('answeredCount').textContent = answered;
+    const floatingAnswered = document.getElementById('floatingAnsweredCount');
+    if (floatingAnswered) floatingAnswered.textContent = answered;
     updatePaletteStates();
     saveQuizProgress();
 }
