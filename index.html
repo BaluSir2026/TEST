@@ -2170,7 +2170,8 @@ function navigateToQuestion(index) {
     const target = document.getElementById(`question-${index}`);
     if (target) {
         target.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const scrollTarget = document.getElementById('questionPalette') || target;
+        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     currentQuestionIndex = index;
