@@ -1319,15 +1319,6 @@ Correct: B
             </div>
 
             <!-- Quiz Content -->
-            <!-- Floating Timer (Always Visible) -->
-<div class="timer-floating" id="floatingTimer" style="display: none;">
-    <div class="timer-label">⏱️ Time Left</div>
-    <div class="timer" id="floatingTimerDisplay">45:00</div>
-</div>
-
-<div class="progress-floating" id="floatingProgress" style="display: none;">
-    <span id="floatingAnsweredCount">0</span> / <span id="floatingTotalCount">0</span> Answered
-</div>
             <div id="quizContent" class="hidden">
                 <div class="timer-section">
                     <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
@@ -2200,12 +2191,7 @@ function stopAutoSave() {
 }
         
 function startTimer() {
-    startTime = new Date();
-    
-    // Show floating timer
-    document.getElementById('floatingTimer').style.display = 'flex';
-    document.getElementById('floatingProgress').style.display = 'block';
-    
+    startTime = new Date(); 
     timerInterval = setInterval(() => {
         timeRemaining--;
         const m = Math.floor(timeRemaining / 60);
@@ -2231,7 +2217,6 @@ function startTimer() {
 
     function updateProgress() {
     const answered = document.querySelectorAll('input[type="radio"]:checked').length;
-    document.getElementById('answeredCount').textContent = answered;
     document.getElementById('floatingAnsweredCount').textContent = answered;
     updatePaletteStates();
     saveQuizProgress();
