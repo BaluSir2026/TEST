@@ -625,31 +625,70 @@
             z-index: 1;
         }
 
-        /* Timer Section with Progress Ring */
+        /* Timer Section - Clean Academic */
         .timer-section {
-            background: linear-gradient(135deg, rgba(233, 30, 140, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 32px;
+            background: white;
+            padding: 20px 28px;
+            border-radius: 20px;
+            margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            border: 2px solid var(--border-light);
+            border: 2px solid #fce4ec;
             position: sticky;
-            top: 0;
+            top: 10px;
             z-index: 100;
+            box-shadow: 0 4px 20px rgba(233,30,140,0.10);
+        }
+
+        .timer-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff0f6;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1.5px solid #fce4ec;
         }
 
         .timer {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5em;
-            font-weight: 700;
-            background: var(--gradient-secondary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.6em;
+            font-weight: 800;
+            color: #e91e8c;
+            letter-spacing: 2px;
+        }
+
+        .progress-bar-wrapper {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82em;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 10px;
+            background: #fce4ec;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e91e8c, #ff6eb4);
+            border-radius: 99px;
+            transition: width 0.5s ease;
+            width: 0%;
         }
 
         /* Animated Score Display */
@@ -1064,6 +1103,33 @@
     border-radius: 4px;
 }
 
+        /* =====================
+           QUESTION CARD - Clean Academic
+           ===================== */
+        .question-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 4px 24px rgba(233,30,140,0.08);
+            border: 2px solid #fce4ec;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #e91e8c, #ff6eb4);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85em;
+            padding: 6px 16px;
+            border-radius: 99px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
     /* Force vertical option layout */
 .question-card label[for^="q"] {
     display: block !important;
@@ -1252,8 +1318,19 @@ Correct: B
             
             <div id="quizContent" class="hidden">
                 <div class="timer-section">
-                    <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
-                    <div><strong>Progress:</strong> <span id="answeredCount" style="font-weight: 700; color: var(--primary);">0</span> / <span id="totalCount">0</span></div>
+                    <div class="timer-box">
+                        <span style="font-size:1.3em;">⏱️</span>
+                        <span id="timer" class="timer">45:00</span>
+                    </div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-label">
+                            <span>📊 Progress</span>
+                            <span><strong id="answeredCount" style="color:#e91e8c;">0</strong> / <strong id="totalCount">0</strong> Answered</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progressBarFill"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="loading" id="loadingQuestions">
@@ -1262,20 +1339,34 @@ Correct: B
                 </div>
 
                 <!-- Question Palette -->
-                <div id="questionPalette" style="display:none; background:white; border-radius:16px; padding:20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border:2px solid #e2e8f0;">
+                <div id="questionPalette" style="display:none; background:white; border-radius:20px; padding:24px; margin-bottom:24px; box-shadow:0 4px 24px rgba(233,30,140,0.10); border:2px solid #fce4ec;">
+                    <!-- Palette Header -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
-                        <h3 style="margin:0; color:#e91e8c; font-size:1em;">📋 Question Palette</h3>
-                        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:0.82em;">
-                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:#10b981;border-radius:4px;display:inline-block;"></span>Answered</span>
-                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:white;border:2px solid #ef4444;border-radius:4px;display:inline-block;"></span>Not Answered</span>
-                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:#e91e8c;border-radius:4px;display:inline-block;"></span>Current</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;padding:6px 14px;border-radius:99px;font-size:0.82em;font-weight:700;">📋 Question Navigator</span>
+                        </div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:0.82em; align-items:center;">
+                            <span style="display:flex; align-items:center; gap:5px;"><span style="width:12px;height:12px;background:#10b981;border-radius:50%;display:inline-block;"></span><span style="color:#64748b;">Answered</span></span>
+                            <span style="display:flex; align-items:center; gap:5px;"><span style="width:12px;height:12px;background:white;border:2px solid #fca5a5;border-radius:50%;display:inline-block;"></span><span style="color:#64748b;">Not Answered</span></span>
+                            <span style="display:flex; align-items:center; gap:5px;"><span style="width:12px;height:12px;background:#e91e8c;border-radius:50%;display:inline-block;"></span><span style="color:#64748b;">Current</span></span>
                         </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; background:#f9fafb; padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:0.9em;">
-                        <span>✅ Answered: <strong id="paletteAnswered" style="color:#10b981;">0</strong></span>
-                        <span>⏳ Remaining: <strong id="paletteRemaining" style="color:#ef4444;">0</strong></span>
-                        <span>📝 Total: <strong id="paletteTotal" style="color:#e91e8c;">0</strong></span>
+                    <!-- Stats Row -->
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
+                        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center;">
+                            <div style="font-size:1.3em;font-weight:800;color:#10b981;" id="paletteAnswered">0</div>
+                            <div style="font-size:0.75em;color:#64748b;font-weight:600;">✅ Answered</div>
+                        </div>
+                        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:10px;text-align:center;">
+                            <div style="font-size:1.3em;font-weight:800;color:#f97316;" id="paletteRemaining">0</div>
+                            <div style="font-size:0.75em;color:#64748b;font-weight:600;">⏳ Remaining</div>
+                        </div>
+                        <div style="background:#fff0f6;border:1.5px solid #fce4ec;border-radius:12px;padding:10px;text-align:center;">
+                            <div style="font-size:1.3em;font-weight:800;color:#e91e8c;" id="paletteTotal">0</div>
+                            <div style="font-size:0.75em;color:#64748b;font-weight:600;">📝 Total</div>
+                        </div>
                     </div>
+                    <!-- Grid -->
                     <div id="paletteGrid" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                 </div>
 
@@ -1381,8 +1472,11 @@ Correct: B
         
         const PERMANENT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx9OGA9AzCRpXtLh_zoIUdQLEx7nBuMyTeQpumRBimX-84FEdEMH1sz-G-Sb_9NEZtu/exec';
         const PERMANENT_QUIZ_ID = 'BALU_QUIZ001';
-        const TRAINER_USERNAME = 'admin';
-        const TRAINER_PASSWORD = 'trainer321';
+        // 🔐 SECURITY: Credentials stored as SHA-256 hashes
+        // Plain text is NEVER stored in code
+        // To change password: use the hash generator below
+        const TRAINER_USERNAME_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+        const TRAINER_PASSWORD_HASH = 'a4bcf822f0bec8e3179d1f79e36b8b1b6dff6116b8e7269d7c89e91749db45cb';
         
         // ============================================
         // DO NOT EDIT BELOW THIS LINE
@@ -1508,26 +1602,89 @@ Correct: B
             document.getElementById('modeSelector').value = 'student';
         }
 
+        // =============================================
+        // 🔐 SHA-256 Hash Function (Web Crypto API)
+        // =============================================
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // =============================================
+        // 🔐 Verify via Apps Script (2nd layer)
+        // =============================================
+        async function verifyWithServer(username, password) {
+            try {
+                const response = await fetch(webAppUrl, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: 'verifyTrainer',
+                        username: username,
+                        password: password
+                    })
+                });
+                const data = await response.json();
+                return data.status === 'success' && data.verified === true;
+            } catch (e) {
+                // If server unreachable, fallback to hash-only check
+                return null;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const username = document.getElementById('loginUsername').value.trim();
                 const password = document.getElementById('loginPassword').value;
-                
-                if (username === TRAINER_USERNAME && password === TRAINER_PASSWORD) {
+                const loginBtn = e.target.querySelector('button[type="submit"]');
+
+                // Show loading
+                loginBtn.textContent = '🔐 Verifying...';
+                loginBtn.disabled = true;
+
+                // ✅ LAYER 1: SHA-256 Hash Check (instant, local)
+                const usernameHash = await sha256(username);
+                const passwordHash = await sha256(password);
+
+                const hashMatch = usernameHash === TRAINER_USERNAME_HASH &&
+                                  passwordHash === TRAINER_PASSWORD_HASH;
+
+                if (!hashMatch) {
+                    // Wrong credentials - reject immediately
+                    document.getElementById('loginError').classList.remove('hidden');
+                    document.getElementById('loginPassword').value = '';
+                    document.getElementById('loginPassword').focus();
+                    loginBtn.textContent = '🔓 Login';
+                    loginBtn.disabled = false;
+                    return;
+                }
+
+                // ✅ LAYER 2: Server verification via Apps Script
+                const serverVerified = await verifyWithServer(username, password);
+
+                if (serverVerified === true || serverVerified === null) {
+                    // serverVerified null = server unreachable, allow if hash matched
                     isTrainerLoggedIn = true;
                     closeLoginModal();
                     document.getElementById('modeSelector').value = 'trainer';
                     document.body.classList.remove('student-mode');
                     document.getElementById('logoutBtn').style.display = 'inline-flex';
                     switchTab('import');
-                    showToast('✅ Welcome back, Trainer!', 'success');
+                    showToast(serverVerified ? '✅ Welcome back, Trainer! (Verified)' : '✅ Welcome back, Trainer!', 'success');
                 } else {
                     document.getElementById('loginError').classList.remove('hidden');
                     document.getElementById('loginPassword').value = '';
                     document.getElementById('loginPassword').focus();
+                    showToast('❌ Server verification failed!', 'error');
                 }
+
+                loginBtn.textContent = '🔓 Login';
+                loginBtn.disabled = false;
             });
         });
 
@@ -1959,7 +2116,7 @@ function generateQuestions() {
         const prevBtn = document.createElement('button');
         prevBtn.type = 'button';
         prevBtn.innerHTML = '&#8592; Previous';
-        prevBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-weight:600;font-size:0.9em;transition:all 0.2s ease;${index === 0 ? 'visibility:hidden;' : ''}`;
+        prevBtn.style.cssText = `padding:12px 28px;border-radius:99px;border:2px solid #fce4ec;background:white;cursor:pointer;font-weight:700;font-size:0.9em;transition:all 0.2s ease;color:#e91e8c;${index === 0 ? 'visibility:hidden;' : ''}`;
         prevBtn.onmouseenter = function() { this.style.borderColor='#e91e8c'; this.style.color='#e91e8c'; };
         prevBtn.onmouseleave = function() { this.style.borderColor='#e2e8f0'; this.style.color='#1e293b'; };
         prevBtn.onclick = () => navigateToQuestion(index - 1);
@@ -1974,11 +2131,11 @@ function generateQuestions() {
         actionBtn.type = 'button';
         if (index < questions.length - 1) {
             actionBtn.innerHTML = 'Save & Next &#8594;';
-            actionBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.9em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#e91e8c,#f48fb1);box-shadow:0 4px 12px rgba(233,30,140,0.3);`;
+            actionBtn.style.cssText = `padding:12px 28px;border-radius:99px;border:none;cursor:pointer;font-weight:700;font-size:0.95em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#e91e8c,#ff6eb4);box-shadow:0 6px 20px rgba(233,30,140,0.35);letter-spacing:0.3px;`;
             actionBtn.onclick = () => { saveQuizProgress(); navigateToQuestion(index + 1); };
         } else {
             actionBtn.innerHTML = '&#10003; Submit Quiz';
-            actionBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.9em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#10b981,#34d399);box-shadow:0 4px 12px rgba(16,185,129,0.3);`;
+            actionBtn.style.cssText = `padding:12px 28px;border-radius:99px;border:none;cursor:pointer;font-weight:700;font-size:0.95em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#10b981,#34d399);box-shadow:0 6px 20px rgba(16,185,129,0.35);letter-spacing:0.3px;`;
             actionBtn.onclick = () => submitQuiz(false);
         }
 
@@ -2037,10 +2194,11 @@ function generateQuestionPalette() {
         btn.textContent = index + 1;
         btn.setAttribute('data-index', index);
         btn.style.cssText = `
-            width:40px; height:40px; border-radius:8px;
-            border:2px solid #ef4444; background:white;
-            color:#ef4444; font-weight:700; font-size:0.9em;
+            width:42px; height:42px; border-radius:50%;
+            border:2px solid #fca5a5; background:white;
+            color:#ef4444; font-weight:700; font-size:0.88em;
             cursor:pointer; transition:all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
         `;
         btn.onclick = () => navigateToQuestion(index);
         grid.appendChild(btn);
@@ -2064,15 +2222,17 @@ function updatePaletteStates() {
         if (isAnswered) answered++;
 
         if (isCurrent) {
-            btn.style.background = '#e91e8c';
+            btn.style.background = 'linear-gradient(135deg,#e91e8c,#ff6eb4)';
             btn.style.borderColor = '#e91e8c';
             btn.style.color = 'white';
-            btn.style.transform = 'scale(1.15)';
+            btn.style.transform = 'scale(1.18)';
+            btn.style.boxShadow = '0 4px 12px rgba(233,30,140,0.4)';
         } else if (isAnswered) {
-            btn.style.background = '#10b981';
+            btn.style.background = 'linear-gradient(135deg,#10b981,#34d399)';
             btn.style.borderColor = '#10b981';
             btn.style.color = 'white';
             btn.style.transform = 'scale(1)';
+            btn.style.boxShadow = '0 2px 8px rgba(16,185,129,0.3)';
         } else {
             btn.style.background = 'white';
             btn.style.borderColor = '#ef4444';
@@ -2153,8 +2313,11 @@ function startTimer() {
 
     function updateProgress() {
     const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+    const total = questions.length;
     document.getElementById('answeredCount').textContent = answered;
-
+    // ✅ Animate progress bar
+    const fill = document.getElementById('progressBarFill');
+    if (fill && total > 0) fill.style.width = Math.round((answered / total) * 100) + '%';
     updatePaletteStates();
     saveQuizProgress();
 }
