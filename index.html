@@ -323,9 +323,23 @@ Correct: A
  div.textContent = text;
  return div.innerHTML;
  }
- function fixMathSymbols(text) {
+ function decodeHtmlEntities(text) {
  if (!text) return text;
  return String(text)
+ .replace(/&lt;/g, '<')
+ .replace(/&gt;/g, '>')
+ .replace(/&amp;/g, '&')
+ .replace(/&quot;/g, '"')
+ .replace(/&#39;/g, "'")
+ .replace(/&le;/g, '<=')
+ .replace(/&ge;/g, '>=')
+ .replace(/&ne;/g, '!=')
+ .replace(/&equals;/g, '=');
+ }
+ function fixMathSymbols(text) {
+ if (!text) return text;
+ text = decodeHtmlEntities(String(text));
+ return text
  .replace(/≤/g, '<=')
  .replace(/⩽/g, '<=') 
  .replace(/≦/g, '<=')
@@ -529,7 +543,15 @@ Correct: A
  if (!response.ok) throw new Error('Network response was not ok');
  const data = await response.json();
  if (data.status === 'success' && data.questions && data.questions.length > 0) {
- questions = data.questions;
+ questions = data.questions.map(q => ({
+ ...q,
+ question: decodeHtmlEntities(q.question || ''),
+ options: (q.options || []).map(o => decodeHtmlEntities(o || '')),
+ optionA: decodeHtmlEntities(q.optionA || ''),
+ optionB: decodeHtmlEntities(q.optionB || ''),
+ optionC: decodeHtmlEntities(q.optionC || ''),
+ optionD: decodeHtmlEntities(q.optionD || '')
+}));
  document.getElementById('loadingQuestions').classList.add('hidden');
  document.getElementById('totalCount').textContent = questions.length;
  generateQuestions();
@@ -947,6 +969,26 @@ function startTimer() {
             overflow:hidden;
             animation:popupIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
             z-index:10001;
-        "><div style="background:linear-gradient(135deg,#0d001a,#1e0040,#2d0060);padding:28px 24px 20px;text-align:center;position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background-image:linear-gradient(rgba(126,34,206,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(126,34,206,.06) 1px,transparent 1px);background-size:30px 30px;"></div><div style="position:relative;z-index:1;"><div style="font-size:2em;margin-bottom:6px;" id="popupEmoji">🎉</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.15em;color:white;letter-spacing:0.3px;" id="popupTitle">Quiz Completed!</div></div></div><div style="display:flex;justify-content:center;margin:-36px 0 0;position:relative;z-index:2;"><div style="position:relative;width:110px;height:110px;"><svg width="110" height="110" style="transform:rotate(-90deg);"><circle cx="55" cy="55" r="46" fill="white" stroke="#e9d5ff" stroke-width="8"/><circle cx="55" cy="55" r="46" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
+        "><div style="background:linear-gradient(135deg,#0d001a,#1e0040,#2d0060);padding:28px 24px 20px;text-align:center;position:relative;overflow:hidden;"><button onclick="closeScorePopup()" style="
+                    position:absolute;top:12px;right:12px;
+                    width:32px;height:32px;border-radius:50%;
+                    background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);
+                    color:white;font-size:1em;cursor:pointer;
+                    display:flex;align-items:center;justify-content:center;
+                    z-index:10;
+                ">✕</button><div style="position:absolute;inset:0;background-image:linear-gradient(rgba(126,34,206,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(126,34,206,.06) 1px,transparent 1px);background-size:30px 30px;"></div><div style="position:relative;z-index:1;"><div style="font-size:2em;margin-bottom:6px;" id="popupEmoji">🎉</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.15em;color:white;letter-spacing:0.3px;" id="popupTitle">Quiz Completed!</div></div></div><div style="display:flex;justify-content:center;margin:-36px 0 0;position:relative;z-index:2;"><div style="position:relative;width:110px;height:110px;"><svg width="110" height="110" style="transform:rotate(-90deg);"><circle cx="55" cy="55" r="46" fill="white" stroke="#e9d5ff" stroke-width="8"/><circle cx="55" cy="55" r="46" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
                             stroke-dasharray="289" id="scoreCircleDash" stroke-dashoffset="289"
-                            stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;"/><defs><linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7e22ce"/><stop offset="100%" stop-color="#ea580c"/></linearGradient></defs></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:1.6em;color:#1e293b;line-height:1;" id="popupScore">0</div><div style="font-size:0.65em;color:#64748b;font-weight:600;" id="popupTotal">/0</div></div></div></div><div style="text-align:center;margin:10px 0 4px;"><span id="popupGradeBadge" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1em;padding:6px 20px;border-radius:99px;display:inline-block;"></span></div><div style="text-align:center;margin-bottom:16px;"><span id="popupPercentage" style="font-family:'Poppins',sans-serif;font-weight:900;font-size:2.2em;color:#1e293b;"></span><span style="color:#64748b;font-size:0.9em;font-weight:600;">%</span></div><div style="display:flex;gap:0;margin:0 24px 20px;border-radius:16px;overflow:hidden;border:1px solid #e9d5ff;"><div style="flex:1;padding:14px;text-align:center;background:#f0fdf4;border-right:1px solid #e9d5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#16a34a;" id="popupCorrect">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">✅ Correct</div></div><div style="flex:1;padding:14px;text-align:center;background:#fef2f2;border-right:1px solid #e9d5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#dc2626;" id="popupWrong">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">❌ Wrong</div></div><div style="flex:1;padding:14px;text-align:center;background:#faf5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#7e22ce;" id="popupSkipped">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">⏭ Skipped</div></div></div><div style="text-align:center;margin-bottom:20px;"><span style="background:#fff7ed;border:1px solid #fed7aa;border-radius:99px;padding:6px 16px;font-size:0.82em;font-weight:600;color:#ea580c;">⏱ Time: <span id="popupTime">-</span></span></div><div style="display:flex;gap:12px;padding:0 24px 24px;"><button onclick="closeScorePopup()" style="flex:1;padding:13px;border-radius:99px;border:2px solid #e9d5ff;background:white;color:#
+                            stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;"/><defs><linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7e22ce"/><stop offset="100%" stop-color="#ea580c"/></linearGradient></defs></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:1.6em;color:#1e293b;line-height:1;" id="popupScore">0</div><div style="font-size:0.65em;color:#64748b;font-weight:600;" id="popupTotal">/0</div></div></div></div><div style="text-align:center;margin:10px 0 4px;"><span id="popupGradeBadge" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1em;padding:6px 20px;border-radius:99px;display:inline-block;"></span></div><div style="text-align:center;margin-bottom:16px;"><span id="popupPercentage" style="font-family:'Poppins',sans-serif;font-weight:900;font-size:2.2em;color:#1e293b;"></span><span style="color:#64748b;font-size:0.9em;font-weight:600;">%</span></div><div style="display:flex;gap:0;margin:0 24px 20px;border-radius:16px;overflow:hidden;border:1px solid #e9d5ff;"><div style="flex:1;padding:14px;text-align:center;background:#f0fdf4;border-right:1px solid #e9d5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#16a34a;" id="popupCorrect">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">✅ Correct</div></div><div style="flex:1;padding:14px;text-align:center;background:#fef2f2;border-right:1px solid #e9d5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#dc2626;" id="popupWrong">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">❌ Wrong</div></div><div style="flex:1;padding:14px;text-align:center;background:#faf5ff;"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4em;color:#7e22ce;" id="popupSkipped">0</div><div style="font-size:0.72em;color:#64748b;font-weight:600;">⏭ Skipped</div></div></div><div style="text-align:center;margin-bottom:20px;"><span style="background:#fff7ed;border:1px solid #fed7aa;border-radius:99px;padding:6px 16px;font-size:0.82em;font-weight:600;color:#ea580c;">⏱ Time: <span id="popupTime">-</span></span></div><div style="display:flex;gap:12px;padding:0 24px 24px;"><button onclick="closeScorePopup()" style="
+                    flex:1;padding:13px;border-radius:99px;
+                    background:linear-gradient(135deg,#7e22ce,#a855f7);
+                    color:white;border:none;font-weight:700;font-size:0.95em;
+                    cursor:pointer;box-shadow:0 4px 16px rgba(126,34,206,0.35);
+                ">📊 View Details</button><button onclick="closeScorePopup()" style="
+                    width:48px;height:48px;border-radius:50%;
+                    background:#f1f5f9;border:2px solid #e2e8f0;
+                    color:#64748b;font-size:1.2em;cursor:pointer;
+                    display:flex;align-items:center;justify-content:center;
+                    flex-shrink:0;
+                ">✕</button></div></div></div></div>
+</body>
+</html>
